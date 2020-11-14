@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style type="text/css">
+    :root {
+      --border: #777;
+      --color: #777;
+    }
+    body {
+      width: 100vw;
+      height: 100vh;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+      margin: 0;
+    }
+    div {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10vw;
+      color: var(--color);
+      background-color: var(--bg);
+    }
+    div:nth-child(1),
+    div:nth-child(4),
+    div:nth-child(7),
+    div:nth-child(2),
+    div:nth-child(5),
+    div:nth-child(8) {
+      border-right: dotted 1px var(--border);
+    }
+    div:nth-child(1),
+    div:nth-child(2),
+    div:nth-child(3),
+    div:nth-child(4),
+    div:nth-child(5),
+    div:nth-child(6) {
+      border-bottom: dotted 1px var(--border);
+    }
+  </style>
+</head>
+<body>
+  <div>7</div>
+  <div>8</div>
+  <div>9</div>
+  <div>4</div>
+  <div>5</div>
+  <div>6</div>
+  <div>1</div>
+  <div>2</div>
+  <div>3</div>
+</body>
+</html>
