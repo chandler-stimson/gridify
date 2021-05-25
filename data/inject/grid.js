@@ -6,13 +6,13 @@
 
   const colors = ['#794c74', '#c56183', '#fadcaa', '#b2deec'];
 
-  const detect = (left, top, width, height, bypass = true) => {
+  const detect = (left, top, width, height) => {
     let es = [];
     for (let x = left; x <= left + width; x += width / config.steps) {
       for (let y = top; y <= top + height; y += height / config.steps) {
         const e = [...document.elementsFromPoint(x * innerWidth / 100, y * innerHeight / 100)]
           .filter(e => {
-            if (e.tagName === 'INPUT' || e.tagName === 'A') {
+            if (e.tagName === 'BUTTON' || e.tagName === 'INPUT' || e.tagName === 'A') {
               return true;
             }
             if (e.getAttribute('tabindex')) {
@@ -50,33 +50,10 @@
       }
     }
 
-    if (!bypass) {
-      // if one element is child of the other one
-      if (es.length === 2) {
-        if (es[0].contains(es[1])) {
-          es = [es[0]];
-        }
-        else if (es[1].contains(es[0])) {
-          es = [es[1]];
-        }
-      }
+    // remove child elements
+    es = es.filter(e => es.some(o => o !== e && o.contains(e)) === false);
 
-      if (es.length === 1) {
-        const e = es[0];
-        e.focus();
-        if (e !== document.querySelector(':focus')) {
-          e.click();
-        }
-        remove();
-      }
-      else if (es.length === 0) {
-        remove();
-        chrome.runtime.sendMessage({
-          method: 'notify',
-          message: 'No link or selectable element is detected'
-        });
-      }
-    }
+    return es;
   };
 
   const history = [];
@@ -105,7 +82,23 @@
     }
 
     build(left, top, width, height, colors[history.length % colors.length], history.length);
-    detect(left, top, width, height, false);
+    const es = detect(left, top, width, height);
+
+    if (es.length === 1) {
+      const e = es[0];
+      e.focus();
+      if (e !== document.querySelector(':focus')) {
+        e.click();
+      }
+      remove();
+    }
+    else if (es.length === 0) {
+      remove();
+      chrome.runtime.sendMessage({
+        method: 'notify',
+        message: 'No link or selectable element is detected'
+      });
+    }
   };
 
   const keydown = e => {
@@ -118,6 +111,13 @@
       opacity();
     }
     else {
+      const o = document.querySelector(`.gves[data-id=${e.key}]`);
+      if (o) {
+        o.e.focus();
+        if (o.e !== document.querySelector(':focus')) {
+          o.e.click();
+        }
+      }
       remove();
     }
     e.preventDefault();
@@ -127,6 +127,9 @@
   };
 
   const remove = level => {
+    for (const e of [...document.querySelectorAll('.gves')]) {
+      e.remove();
+    }
     if (level) {
       [...document.querySelectorAll('.level-' + level)].forEach(r => r.remove());
     }
@@ -150,7 +153,7 @@
     iframe.style = `
       position: fixed;
       z-index: 2147483647;
-      border: none;
+      border: dotted 1px #777;
       left: ${left}%;
       top: ${top}%;
       width: ${width}%;
@@ -158,11 +161,38 @@
       pointer-events: none;
     `;
     document.documentElement.appendChild(iframe);
+
+    const es = detect(left, top, width, height);
+    for (const e of [...document.querySelectorAll('.gves')]) {
+      e.remove();
+    }
+    if (level) {
+      es.slice(0, 9).forEach((e, n) => {
+        const box = e.getBoundingClientRect();
+        const div = document.createElement('div');
+        div.classList.add('gves');
+        div.style = `
+          position: fixed;
+          border: solid 1px rgba(255, 0, 0, 0.8);
+          color: red;
+          font-size: 20px;
+          z-index: 1000000000000;
+          background-color: rgba(255,255,255,0.5);
+        `;
+        div.style.left = box.left + 'px';
+        div.style.top = box.top + 'px';
+        div.style.width = box.width + 'px';
+        div.style.height = box.height + 'px';
+        div.e = e;
+        div.dataset.id = div.textContent = String.fromCharCode(97 + n);
+        document.body.appendChild(div);
+      });
+    }
+
     opacity();
   };
   remove();
   build(0, 0, 100, 100, '#000');
-  detect(0, 0, 100, 100, true);
 
   document.addEventListener('keydown', keydown);
   document.addEventListener('click', click);

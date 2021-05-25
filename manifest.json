@@ -1,6 +1,6 @@
 {
   "manifest_version": 2,
-  "version": "0.1.0",
+  "version": "0.1.1",
   "name": "Gridify - Keyboard Link Selector",
   "description": "Select any link or input box without using mouse with a few keyboard clicks",
   "permissions": [
@@ -24,6 +24,7 @@
     ]
   },
   "browser_action": {},
+  "homepage_url": "https://add0n.com/gridify.html",
   "web_accessible_resources": [
     "data/view/index.html"
   ]
